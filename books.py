@@ -49,3 +49,23 @@ async def read_all_books(dynamic_param):
         if book["title"] == dynamic_param:
             return book
     return None
+
+
+# Query Parameters
+@app.get("/books/")
+async def read_all_books(category: str):
+    books_to_return = []
+    for book in BOOKS:
+        if book["category"].casefold() == category.casefold():
+            books_to_return.append(book)
+
+    # books to return by filter
+    return books_to_return
+
+@app.get("/books/{book_author}/")
+async def get_books_by_author(book_author: str, category: str):
+    books_to_return = []
+    for book in BOOKS:
+        if book["author"].casefold() == book_author.casefold() and book["category"].casefold() == category.casefold():
+            books_to_return.append(book)
+    return books_to_return
