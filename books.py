@@ -89,3 +89,13 @@ async def update_book(updated_book=Body(...)):
             BOOKS[i] = updated_book
             return "Book updated"
     return None
+
+
+# DELETE Request in FastAPI
+@app.delete("/books/delete_book/{book_title}")
+async def delete_book(book_title: str):
+    for book in BOOKS:
+        if book["title"].casefold() == book_title.casefold():
+            BOOKS.remove(book)
+            return "Book deleted"
+    return "No book found"
