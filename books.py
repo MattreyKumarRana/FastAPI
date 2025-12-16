@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 
 app = FastAPI()
 
@@ -31,7 +31,11 @@ BOOKS = [
 ]
 
 
-# GET Requests in FASTAPI
+# GET Requests in FastAPI
+@app.get("/")
+async def root():
+    return {"message": "Welcome to FastAPI!"}
+
 @app.get("/books")
 async def read_all_books():
     return BOOKS
@@ -72,13 +76,16 @@ async def get_books_by_author(book_author: str, category: str):
     return books_to_return
 
 
-# POST Requests in FASTAPI
+# POST Requests in FastAPI
 @app.post("/books/create_book")
-async def create_book():
-    book = {
-            "title": 'Title 6',
-            "author": 'Author 2',
-            "category": 'science'
-    }
-    BOOKS.append(book)
-    return "Book Created"
+async def create_book(book=Body(...)):
+    return "book created"
+
+# PUT Request in FastAPI
+@app.put("/books/update_book")
+async def update_book(updated_book=Body(...)):
+    for i in range(len(BOOKS)):
+        if updated_book["title"].casefold() == BOOKS[i].get("title").casefold():
+            BOOKS[i] = updated_book
+            return "Book updated"
+    return None
