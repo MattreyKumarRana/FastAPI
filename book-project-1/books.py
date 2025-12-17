@@ -47,6 +47,15 @@ async def get_my_book():
         "favourite_book": "This is my favourite book",
     }
 
+# API Endpoint Challenge
+@app.get("/books/{book_author}")
+async def get_books_by_author(book_author: str):
+    books_to_return = []
+    for book in BOOKS:
+        if book["author"].casefold() == book_author.casefold():
+            books_to_return.append(book)
+    return books_to_return
+
 # Dynamic Path
 @app.get("/books/{dynamic_param}")
 async def read_all_books(dynamic_param):
@@ -67,18 +76,19 @@ async def read_all_books(category: str):
     # books to return by filter
     return books_to_return
 
-@app.get("/books/{book_author}/")
-async def get_books_by_author(book_author: str, category: str):
-    books_to_return = []
-    for book in BOOKS:
-        if book["author"].casefold() == book_author.casefold() and book["category"].casefold() == category.casefold():
-            books_to_return.append(book)
-    return books_to_return
+# @app.get("/books/{book_author}/")
+# async def get_books_by_author(book_author: str, category: str):
+#     books_to_return = []
+#     for book in BOOKS:
+#         if book["author"].casefold() == book_author.casefold() and book["category"].casefold() == category.casefold():
+#             books_to_return.append(book)
+#     return books_to_return
 
 
 # POST Requests in FastAPI
 @app.post("/books/create_book")
 async def create_book(book=Body(...)):
+    BOOKS.append(book)
     return "book created"
 
 # PUT Request in FastAPI
@@ -99,3 +109,5 @@ async def delete_book(book_title: str):
             BOOKS.remove(book)
             return "Book deleted"
     return "No book found"
+
+
