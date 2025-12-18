@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
+from typing import Optional
 
 app = FastAPI()
 
@@ -11,11 +12,22 @@ class Book(BaseModel):
     rating: int
 
 class BookRequest(BaseModel):
-    id: int = Field(gt=0)
+    id: Optional[int] = Field(description="ID is not needed for the book", default=None)
     title: str = Field(min_length=3)
     author: str = Field(min_length=3)
     description: str = Field(min_length=1, max_length=100)
     rating: int = Field(ge=1, le=5)
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                "title": "A new book",
+                "author": "codingwithroby",
+                "description": "A very amazing book still",
+                "rating": 5
+            }]
+        }
+    }
 
 BOOKS = [
     Book(id=1, title="Computer Science", author="codingwithroby", description="A very nice book!", rating=5),
