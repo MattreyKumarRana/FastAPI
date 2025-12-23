@@ -77,6 +77,14 @@ async def update_book(book: BookRequest):
             BOOKS[i].description = book.description
             BOOKS[i].rating = book.rating
 
+# DELETE Request with FastAPI
+@app.delete("/books/{book_id}")
+async def delete_book(book_id: int):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == book_id:
+            BOOKS.pop(i)
+            break
+
 def increment_id(book:Book):
     if len(BOOKS) > 0:
         book.id = BOOKS[-1].id + 1
