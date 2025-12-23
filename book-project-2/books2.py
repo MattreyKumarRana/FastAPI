@@ -52,12 +52,30 @@ async def get_book(book_id: int):
             return book
     return "Not Found"
 
+@app.get("/books")
+async def get_books_by_rating(rating: int):
+    books_to_return = []
+    for book in BOOKS:
+        if book.rating == rating:
+            books_to_return.append(book)
+
+    return books_to_return
+
 @app.post("/create_book")
 async def create_book(book: BookRequest):
     new_book = Book(**book.model_dump())
     BOOKS.append(increment_id(new_book))
     return new_book
 
+@app.put("/books/update_book")
+async def update_book(book: BookRequest):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == book.id:
+            BOOKS[i].id = book.id
+            BOOKS[i].title = book.title
+            BOOKS[i].author = book.author
+            BOOKS[i].description = book.description
+            BOOKS[i].rating = book.rating
 
 def increment_id(book:Book):
     if len(BOOKS) > 0:
