@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Path, Query, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
+from starlette import status
 
 app = FastAPI()
 
@@ -40,22 +41,22 @@ BOOKS = [
     Book(id=5, title="Title 2", author="author 2", description="Okayish!", rating=3, published_date=2017),
 ]
 
-@app.get("/")
+@app.get("/", status_code=status.HTTP_200_OK)
 async def root():
     return {"message": "Book2 Project Started"}
 
-@app.get("/books")
+@app.get("/books", status_code=status.HTTP_200_OK)
 async def get_books():
     return BOOKS
 
-@app.get("/books/{book_id}")
+@app.get("/books/{book_id}", status_code=status.HTTP_200_OK)
 async def get_book(book_id: int = Path(gt = 0)):
     for book in BOOKS:
         if book.id == book_id:
             return book
     raise HTTPException(status_code=404, detail="Book not found")
 
-@app.get("/books")
+@app.get("/books", status_code=status.HTTP_200_OK)
 async def get_books_by_rating(rating: int = Query(gt = 0, lt = 6)):
     books_to_return = []
     for book in BOOKS:
@@ -64,14 +65,14 @@ async def get_books_by_rating(rating: int = Query(gt = 0, lt = 6)):
 
     return books_to_return
 
-@app.post("/create_book")
+@app.post("/create_book", status_code=status.HTTP_201_CREATED)
 async def create_book(book: BookRequest):
     new_book = Book(**book.model_dump())
     BOOKS.append(increment_id(new_book))
     return new_book
 
 # GET Request fetch book by published date
-@app.get("/books/book_date/{book_date}")
+@app.get("/books/book_date/{book_date}", status_code=status.HTTP_200_OK)
 async def get_books_by_published_date(book_date: int = Path(ge=1999, le=3000)):
     books_to_return = []
     for book in BOOKS:
@@ -80,7 +81,7 @@ async def get_books_by_published_date(book_date: int = Path(ge=1999, le=3000)):
 
     return books_to_return
 
-@app.put("/books/update_book")
+@app.put("/books/update_book", status_code=status.HTTP_204_NO_CONTENT)
 async def update_book(book: BookRequest):
     book_changed = False
     for i in range(len(BOOKS)):
@@ -97,7 +98,7 @@ async def update_book(book: BookRequest):
         raise HTTPException(status_code=404, detail="Book not found")
 
 # DELETE Request with FastAPI
-@app.delete("/books/{book_id}")
+@app.delete("/books/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_book(book_id: int = Path(gt = 0)):
     book_changed = False
     for i in range(len(BOOKS)):
