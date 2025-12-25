@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path
+from fastapi import FastAPI, Path, Query
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -56,7 +56,7 @@ async def get_book(book_id: int = Path(gt = 0)):
     return "Not Found"
 
 @app.get("/books")
-async def get_books_by_rating(rating: int):
+async def get_books_by_rating(rating: int = Query(gt = 0, lt = 6)):
     books_to_return = []
     for book in BOOKS:
         if book.rating == rating:
@@ -72,7 +72,7 @@ async def create_book(book: BookRequest):
 
 # GET Request fetch book by published date
 @app.get("/books/book_date/{book_date}")
-async def get_books_by_published_date(book_date: int):
+async def get_books_by_published_date(book_date: int = Path(ge=1999, le=3000)):
     books_to_return = []
     for book in BOOKS:
         if book.published_date == book_date:
