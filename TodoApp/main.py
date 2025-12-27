@@ -8,15 +8,20 @@ import models
 from models import Todos
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal
+from routers import auth
 
 models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+app.include_router(auth.router)
 
 class TodoRequest(BaseModel):
     title: str = Field(min_length=1)
     description: str = Field(min_length=1, max_length=100)
     priority: int = Field(gt=0, lt=6)
     complete: bool = Field(default=False)
-app = FastAPI()
+
 
 def get_db():
     db = SessionLocal()
