@@ -25,7 +25,7 @@ router = APIRouter(
 JWT_SECRET = os.environ.get("JWT_SECRET")
 JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -111,4 +111,4 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
 
     token = create_access_token(user.user_name, user.id, timedelta(minutes=30))
-    return token
+    return {"access_token": token, "token_type": "bearer"}

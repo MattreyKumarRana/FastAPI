@@ -1,12 +1,13 @@
 # Main Python file for the Todos App
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path
 from typing import Annotated
 from pydantic import BaseModel, Field
 from starlette import status
 from models import Todos
 from sqlalchemy.orm import Session
 from database import SessionLocal
+from .auth import get_current_user
 
 router = APIRouter()
 
@@ -26,6 +27,7 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 # GET Request
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -42,8 +44,12 @@ async def read_todo(db: db_dependency, todo_id: int = Path(gt = 0)):
 
 # POST Request for creation of a todo
 @router.post("/todo", status_code=status.HTTP_201_CREATED)
-async def create_todo(db: db_dependency, todo_request: TodoRequest):
-    todo_model = Todos(**todo_request.model_dump())
+async def create_todo(user: user_dependency, db: db_dependency, todo_request: TodoRequest):
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    todo_model = Todos(**todo_request.model_dump(),
+                       owner_id = user.get('id'))
     db.add(todo_model)
     db.commit()
     db.refresh(todo_model)  # loads generated id
