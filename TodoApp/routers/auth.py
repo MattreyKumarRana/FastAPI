@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -9,8 +10,18 @@ from database import SessionLocal
 from models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm
+from jose import jwt
+
+import os
+from dotenv import load_dotenv
+load_dotenv()  # loads .env from project root (current working directory)
 
 router = APIRouter()
+
+JWT_SECRET = os.environ.get("JWT_SECRET")
+JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
+
+
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Pydantic Model for a user
@@ -40,7 +51,21 @@ def authenticate_user(username: str, password: str, db):
         return False
     if not bcrypt_context.verify(password, user.hashed_password):
         return False
-    return True
+    return user
+
+def create_access_token(username: str, user_id: int, expires_delta: timedelta):
+    encode = {
+        'sub': username,
+        'id': user_id,
+    }
+    expires = datetime.now(timezone.utc) + expires_delta
+
+    encode.update(
+        {'exp': expires}
+    )
+
+    return jwt.encode(encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
 
 @router.post("/auth", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
@@ -60,7 +85,8 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
 @router.post("/token")
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
-
     if not user:
         return "Failed Authentication"
-    return "Successful Authentication"
+
+    token = create_access_token(user.user_name, user.id, timedelta(minutes=30))
+    return token
