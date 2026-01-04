@@ -34,12 +34,12 @@ async def delete_todo(todo_id: int, db : db_dependency, user: user_dependency):
     if user is None or user.get("user_role") != "admin":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not Authenticate")
 
-    todo_model = db.query(Todos).filter(Todos.id == todo_id).first()
+    todo_model = db.query(Todos).filter(Todos.id == todo_id).first() # type: ignore
 
     if todo_model is None:
         raise HTTPException(detail="Todo not found", status_code=status.HTTP_404_NOT_FOUND)
 
-    db.query(Todos).filter(Todos.id == todo_id).delete()
+    db.query(Todos).filter(Todos.id == todo_id).delete() #type: ignore
     db.commit()
 
 
